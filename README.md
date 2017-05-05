@@ -1,6 +1,11 @@
 # socat
 
+Run socat command in alpine container
+
+
 ## use case
+
+Expose a tcp socket for accessing docker API on macOS
 
 The Docker for Mac native macOS application provides use of docker engine without the need for vagrant or other virtualized linux operating system. Docker for Mac does not provide the same docker daemon configuration options as other versions of docker-engine. macOS-socat uses socat to establish a tcp socket bound to localhost which makes available the Docker for Mac API.
 
