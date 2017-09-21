@@ -2,6 +2,8 @@
 
 Run socat command in alpine container
 
+[![DockerHub Badge](http://dockeri.co/image/alpine/socat)](https://hub.docker.com/r/alpine/socat/)
+
 
 ## use case
 
