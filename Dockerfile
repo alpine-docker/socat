@@ -1,7 +1,5 @@
 FROM alpine
 
-RUN apk --update add socat && \
-    rm -rf /var/cache/apk/* && \
-    rm -rf /root/.cache
+RUN apk --no-cache add socat
 
 ENTRYPOINT ["socat"]
