@@ -4,6 +4,19 @@ Run socat command in alpine container
 
 [![DockerHub Badge](http://dockeri.co/image/alpine/socat)](https://hub.docker.com/r/alpine/socat/)
 
+Auto-trigger docker build for [socat](https://pkgs.alpinelinux.org/package/edge/main/x86/socat) when new version is released.
+
+### Repo:
+
+https://github.com/alpine-docker/socat
+
+### Daily build logs:
+
+https://travis-ci.org/alpine-docker/socat
+
+### Docker iamge tags:
+
+https://hub.docker.com/r/alpine/socat/tags/
 
 ## Use Case: Expose a tcp socket for accessing docker API on macOS
 
@@ -43,3 +56,10 @@ $ docker run \
 * To run the container in the background insert ```--detach``` after ```docker run```.
 * To automatically start the container on restart insert ```--restart always``` after ```docker run```.
 * To automatically start the container unless it has been stopped explicitly insert ```--restart unless-stopped``` after ```docker run```.
+
+# The Processes to build this image
+
+* Enable Travis CI cronjob on this repo to run build daily on master branch
+* Check if there are new tags/releases announced via Alpine package url (https://hub.docker.com/r/alpine/socat/)
+* Match the exist docker image tags via Hub.docker.io REST API
+* If not matched, build the image with latest version as tag and push to hub.docker.com
