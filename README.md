@@ -63,3 +63,4 @@ $ docker run \
 * Check if there are new tags/releases announced via Alpine package url (https://hub.docker.com/r/alpine/socat/)
 * Match the exist docker image tags via Hub.docker.io REST API
 * If not matched, build the image with latest version as tag and push to hub.docker.com
+* Docker tags as socat's version, such as 1.7.3.3-rc0, are built by travis ci auto-trigger cron jobs.
