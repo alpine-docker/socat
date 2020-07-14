@@ -57,6 +57,36 @@ $ docker run \
 * To automatically start the container on restart insert ```--restart always``` after ```docker run```.
 * To automatically start the container unless it has been stopped explicitly insert ```--restart unless-stopped``` after ```docker run```.
 
+## Use Case: Use nginx-proxy to access a local Cockpit instance
+
+Socat docker image by defintion does not use any EXPOSE inside Dockerfile. This may prejudice other containers that rely on this information, like nginx-proxy (https://github.com/nginx-proxy/nginx-proxy).
+
+Using expose will allow nginx-proxy to properly detect and communicate with socat instance without opening the port on host like ports option does.
+
+### Example
+In the following example, socat will be used to relay a host Cockpit instance to the nginx-proxy image, allowing to rely on proxy ports and optional Let's Encrypt support.
+
+```
+  cockpit-relay:
+    image: alpine/socat
+    container_name: cockpit-relay
+    depends_on:
+      - nginx-proxy
+    command: "TCP-LISTEN:9090,fork,reuseaddr TCP:172.17.0.1:9090"
+    expose:
+      - "9090"
+    environment:
+      - VIRTUAL_HOST=somehost.somedomain
+      - VIRTUAL_PROTO=https
+      - LETSENCRYPT_HOST=somehost.somedomain
+      - LETSENCRYPT_EMAIL=some@email.somedomain
+    restart: unless-stopped
+    logging:
+      driver: journald
+    networks:
+      - webservices
+```
+
 # The Processes to build this image
 
 * Enable Travis CI cronjob on this repo to run build daily on master branch
