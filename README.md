@@ -14,7 +14,7 @@ https://github.com/alpine-docker/socat
 
 https://travis-ci.org/alpine-docker/socat
 
-### Docker iamge tags:
+### Docker image tags:
 
 https://hub.docker.com/r/alpine/socat/tags/
 
@@ -34,7 +34,7 @@ $ docker run -d --restart=always \
     tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
 ```
 
-***WARNING***: The Docker API is unsecure by default. Please remember to bind the TCP socket to the localhost interface otherwise the Docker API will be bound to all interfaces.
+***WARNING***: The Docker API is insecure by default. Please remember to bind the TCP socket to the `localhost` interface otherwise the Docker API will be bound to all interfaces.
 
 ## Use Case: Publish a port on an existing container
 
