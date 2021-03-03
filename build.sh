@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+###
+# NOTE - use "make build" instead of running this script
+###
+
 # Prerequisite
 # Make sure you set secret enviroment variables in Travis CI
 # DOCKER_USERNAME
