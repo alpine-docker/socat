@@ -1,0 +1,40 @@
+# This will fire for every PR on as well as tags.
+# Docker push and deployment to DEV will happen for commits to `master` branch or tags.
+pr:
+  autoCancel: true
+
+trigger:
+  tags:
+    include: ['v*.*.*']
+
+variables:
+  - group: global-variables
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      endpoint: mx51
+      name: mx51/azure-cicd-templates
+      ref: refs/heads/master
+
+stages:
+  - template: msp-be-pipeline.yml@templates
+    parameters:
+      componentName: alpine-socat
+      #accountClasses: [cde, main]                # TODO: what do I do here if I just want to build and push?
+      #deploymentRef: 'refs/heads/master'
+      imageTag: $(Build.BuildNumber)
+      twistlockPassword: $(TWISTLOCK_PASSWORD)
+      dockerfilePath: Dockerfile
+      runHelmKubeval: false
+      runCheckDeps: false
+      runCheckPackr: []
+      runUnitTest: false
+      runCodeAnalysis: false
+      runCodeCoverage: false
+      runDBMigration: false
+      runE2ETests: false
+      runSnykVulnScan: false
+      category: ops
+      deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
