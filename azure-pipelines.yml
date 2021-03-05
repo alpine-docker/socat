@@ -36,6 +36,6 @@ stages:
       runCodeCoverage: false
       runDBMigration: false
       runE2ETests: false
-      runSnykVulnScan: false
+      runSnykVulnScan: true
       category: ops
       deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
