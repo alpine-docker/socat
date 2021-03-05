@@ -16,7 +16,7 @@ resources:
       type: github
       endpoint: mx51
       name: mx51/azure-cicd-templates
-      ref: refs/heads/master
+      ref: refs/heads/dev-support-for-ecrRepository-1   # TODO - revert
 
 stages:
   - template: msp-be-pipeline.yml@templates
