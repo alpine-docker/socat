@@ -24,6 +24,7 @@ stages:
       componentName: alpine-socat
       #accountClasses: [cde, main]                # TODO: what do I do here if I just want to build and push?
       #deploymentRef: 'refs/heads/master'
+      preventDeployment: true
       imageTag: $(Build.BuildNumber)
       twistlockPassword: $(TWISTLOCK_PASSWORD)
       dockerfilePath: Dockerfile
