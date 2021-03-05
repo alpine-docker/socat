@@ -25,7 +25,6 @@ stages:
       #accountClasses: [cde, main]                # TODO: what do I do here if I just want to build and push?
       #deploymentRef: 'refs/heads/master'
       imageTag: $(Build.BuildNumber)
-      snykToken: $(SNYK_TOKEN)
       twistlockPassword: $(TWISTLOCK_PASSWORD)
       dockerfilePath: Dockerfile
       runHelmKubeval: false
@@ -36,6 +35,6 @@ stages:
       runCodeCoverage: false
       runDBMigration: false
       runE2ETests: false
-      runSnykVulnScan: true
+      runSnykVulnScan: false
       category: ops
       deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
