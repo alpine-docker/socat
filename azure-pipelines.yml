@@ -22,6 +22,7 @@ stages:
   - template: msp-be-pipeline.yml@templates
     parameters:
       componentName: alpine-socat
+      ecrRepository: mx51io
       #accountClasses: [cde, main]                # TODO: what do I do here if I just want to build and push?
       #deploymentRef: 'refs/heads/master'
       preventDeployment: true
