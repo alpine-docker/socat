@@ -41,6 +41,12 @@ stages:
       category: ops
       deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
 
+      # Additional build-stage testing steps
+      steps:
+      - script: make testruntime
+        displayName: "Socat tunnel runtime test"
+
+  # Separate stage: test
   - stage: test
     displayName: "Stage: Test"
     jobs:
@@ -48,5 +54,6 @@ stages:
       pool: shared
       steps:
 
-      - script: make testruntime
+      # This does not work unless `make release` is performed on v*.*.* tag trigger
+      - script: echo make testruntime
         displayName: "Socat tunnel runtime test"
