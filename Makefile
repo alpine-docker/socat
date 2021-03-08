@@ -19,6 +19,13 @@ test:
 PHONY: test
 
 
+## Executes a simple socat test within a running docker instance
+testruntime:
+	docker run --rm --entrypoint=/tmp/test-socat.sh $(IMAGE)
+	@echo "All tests completed successfully"
+PHONY: testruntime
+
+
 ## Tag and push new docker image to docker hub
 release:
 	./scripts/make.sh release

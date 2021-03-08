@@ -48,7 +48,5 @@ stages:
       pool: shared
       steps:
 
-      - script: echo "testing ..."
-
-      - script: echo "testing complete"
-
+      - script: make testruntime
+        displayName: "Socat tunnel runtime test"
