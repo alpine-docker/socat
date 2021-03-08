@@ -23,7 +23,7 @@ stages:
     parameters:
       componentName: alpine-socat
       dockerRepository: mx51io
-      #accountClasses: [cde, main]                # TODO: what do I do here if I just want to build and push?
+      #accountClasses: [cde, main]
       #deploymentRef: 'refs/heads/master'
       preventDeployment: true
       imageTag: $(Build.BuildNumber)
