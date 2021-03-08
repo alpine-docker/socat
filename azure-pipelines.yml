@@ -11,10 +11,11 @@ variables:
 
 stages:
 - stage: build
-  displayName: "Stage: Build"
+  displayName: "Stage: Build and Release"
 
   jobs:
   - job: Build
+    displayName: "Build, Test, Scan, Release"
     pool: shared
     workspace:
       clean: all
@@ -24,22 +25,8 @@ stages:
     - script: make build
       displayName: "Build image"
 
-  - job: Test
-    pool: shared
-    workspace:
-      clean: all
-
-    steps:
-
     - script: make test
       displayName: "Test image"
-
-  - job: Scan
-    pool: shared
-    workspace:
-      clean: all
-
-    steps:
 
     - script: make twistscan
       env:
@@ -47,19 +34,13 @@ stages:
         TWISTLOCK_PASS: $(TWISTLOCK_PASS)
       displayName: "Scan image"
 
-
-- ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/') }}:
-  - stage: release
-    displayName: "Stage: Release"
-    dependsOn: build
-
-    jobs:
-    - job: Release
-      pool: shared
-      workspace:
-        clean: all
-
-      steps:
+    - ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/') }}:
+      - script: |
+          docker login -u $(DOCKER_HUB_USER) -p $(DOCKER_HUB_PASS)
+        env:
+          DOCKER_HUB_USER: $(DOCKER_HUB_USER)
+          DOCKER_HUB_PASS: $(DOCKER_HUB_PASS)
+        displayName: 'Perform docker login to mx51io'
 
       - script: make release
         displayName: "Release image"
