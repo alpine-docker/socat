@@ -16,7 +16,7 @@ resources:
       type: github
       endpoint: mx51
       name: mx51/azure-cicd-templates
-      ref: refs/heads/dev-support-for-ecrRepository-1   # TODO - revert
+      ref: refs/heads/master
 
 stages:
   - template: msp-be-pipeline.yml@templates
@@ -40,3 +40,15 @@ stages:
       runSnykVulnScan: false
       category: ops
       deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
+
+  - stage: test
+    displayName: "Stage: Test"
+    jobs:
+    - job: Test
+      pool: shared
+      steps:
+
+      - script: echo "testing ..."
+
+      - script: echo "testing complete"
+
