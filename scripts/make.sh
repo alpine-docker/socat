@@ -19,6 +19,17 @@ die() {
   exit 1
 }
 
+# Error if env var not found
+check_env_var() {
+  VAR_NAME=$1
+  VAR_VALUE=$2
+
+  if [ -z "${VAR_VALUE}" ]; then
+    die "error: environment variable not found: ${VAR_NAME}"
+  fi
+}
+
+# Lookup latest socat version from alpinelinux packages
 source_socat_version_value() {
   export SOCAT_VERSION=$( curl -s https://pkgs.alpinelinux.org/package/edge/main/x86/socat | \
     docker run -i --rm -v output:/apps/output alpine/html2text -nobs | \
@@ -27,47 +38,37 @@ source_socat_version_value() {
   echo " * Latest socat package version: $SOCAT_VERSION"
 }
 
+# Determine DOCKER_TAG_NAME value
 source_version_value() {
-  # Check for GITHUB_REF value
-  if [ ! -z "$GITHUB_REF" ]; then
-    echo " * Using GITHUB_REF to source docker tag name"
-    BRANCH_NAME="${GITHUB_REF}"
-    BRANCH_NAME=${BRANCH_NAME##"refs/tags/"}
-    BRANCH_NAME=${BRANCH_NAME##"refs/heads/"}
-  elif [ ! -z "$BUILD_SOURCEBRANCH" ]; then
-    echo " * Using Azure Build.SourceBranch variable to source docker tag name"
-    BRANCH_NAME="${BUILD_SOURCEBRANCH}"
-    BRANCH_NAME=${BRANCH_NAME##"refs/tags/"}
-    BRANCH_NAME=${BRANCH_NAME##"refs/heads/"}
+  # Check if building off tag in Azure
+  if [[ $BUILD_SOURCEBRANCH == refs/tags/* ]]; then
+    echo " * Azure BUILD_SOURCEBRANCH env var with tag value detected: $BUILD_SOURCEBRANCH"
+
+    # Clean up tag name
+    TAG_NAME=${BUILD_SOURCEBRANCH##"refs/tags/"}
+
+    # Use as docker image version
+    export DOCKER_TAG_NAME="$TAG_NAME"
+
   else
-    echo " * Using 'git rev-parse' to source docker tag name"
+    # Source version via git describe (borrowed from spice project)
+    echo " * Using 'git describe' to source version value"
     set +e
-    BRANCH_NAME=$( git rev-parse --symbolic-full-name --abbrev-ref HEAD 2>/dev/null )
+    GIT_DESCRIBE=$( git describe --always --tags --long 2> /dev/null )
     set -e
     echo
+
+    # Check branch name value exists and is valid
+    if [ -z "$GIT_DESCRIBE" ]; then
+      die "error: git project not detected, or not initalised properly"
+    fi
+
+    # Use as docker image version
+    export DOCKER_TAG_NAME=$GIT_DESCRIBE
   fi
-
-  # Check branch name value exists and is valid
-  if [ -z "$BRANCH_NAME" ] || [ "$BRANCH_NAME" == "HEAD" ]; then
-    echo "error: git project not detected, or not initalised properly"
-    echo "expecting valid tag/branch name (value was either HEAD or not present)."
-    exit 1
-  fi
-
-  # Apply name fix
-  BRANCH_NAME=$( echo $BRANCH_NAME | tr '/' '-' )
-
-  # Strip 'version-*' substring if present
-  BRANCH_NAME=${BRANCH_NAME##"version-"}
-
-  # Check for 'v*.*.*' tag format
-  if [[ $BRANCH_NAME =~ ^v[0-9]+.[0-9]+.[0-9]+ ]]; then
-    BRANCH_NAME=${BRANCH_NAME##"v"}
-  fi
-
-  export DOCKER_TAG_NAME=$BRANCH_NAME
 }
 
+# Include build information within image
 generate_build_props() {
   # Check path for generated artefacts
   if [ ! -d "$BUILD_ARTEFACT_PATH" ]; then
@@ -76,8 +77,8 @@ generate_build_props() {
   fi
 
   # Generate build-time info
-  echo "{\"version\":\"$DOCKER_TAG_NAME\"}"  > $BUILD_ARTEFACT_PATH/version.json
-  echo "{\"socat_version\":\"$SOCAT_VERSION\"}" >> $BUILD_ARTEFACT_PATH/version.json
+  echo -n "{\"version\":\"$DOCKER_TAG_NAME\", "  > $BUILD_ARTEFACT_PATH/version.json
+  echo "\"socat_version\":\"$SOCAT_VERSION\"}" >> $BUILD_ARTEFACT_PATH/version.json
 
   # Curious what our build system will produce here ...
   echo "{\"build_timestamp\":\"$( date +%Y-%m-%d:%H:%M:%S )\",
@@ -88,6 +89,7 @@ generate_build_props() {
 \"build_architecture\":\"$( uname -m )\"}" > $BUILD_ARTEFACT_PATH/build.json
 }
 
+# Tag a docker image
 docker_tag() {
   IMG="$1"
   TAG="$2"
@@ -96,6 +98,7 @@ docker_tag() {
   docker tag $IMG:latest $IMG:$TAG
 }
 
+# Push a docker image
 docker_push() {
   IMG="$1"
   TAG="$2"
@@ -104,12 +107,20 @@ docker_push() {
   docker push $IMG:$TAG || die "error: failed to push image"
 }
 
-build() {
+
+# Make build
+run_build() {
+  echo " * Building image ..."
+
+  # Source socat version from alpinelinux package manager
+  if [ -z "$SOCAT_VERSION" ]; then
+    source_socat_version_value
+  fi
+  
   # Prepare build artefacts
   generate_build_props
 
   # Build image
-  echo " * Building image ..."
   docker build \
     --build-arg SOCAT_VERSION=$SOCAT_VERSION \
     -t $IMAGE_NAME:latest .
@@ -137,7 +148,33 @@ build() {
 }
 
 
-release() {
+# make test
+run_test() {
+  echo " * Testing static docker image: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
+
+  # Simple test: check socat version
+  docker run --rm \
+    --entrypoint=socat \
+    $IMAGE_NAME:$DOCKER_TAG_NAME \
+    -V | head -2
+}
+
+# make testruntime
+run_testruntime() {
+  echo " * Testing runtime docker instance: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
+
+  # Create socat tunnel and test 
+  docker run --rm \
+    --entrypoint=/tmp/test-socat.sh \
+    $IMAGE_NAME:$DOCKER_TAG_NAME
+}
+
+
+# Make release
+run_release() {
+  echo " * Releasing docker image: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
+
+  # Push latest tags
   docker_push $IMAGE_NAME "latest"
   docker_push $IMAGE_NAME $DOCKER_TAG_NAME
 
@@ -154,6 +191,7 @@ release() {
   echo
 }
 
+
 load-kind() {
   echo " * Loading image into kind cluster: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
   kind load docker-image $IMAGE_NAME:$DOCKER_TAG_NAME
@@ -168,30 +206,24 @@ TASK="$1"
 echo
 
 # Source image name
-if [ -z "$IMAGE_NAME" ]; then
-  echo "error: env var not set: IMAGE_NAME"
-  exit 1
-fi
+check_env_var "IMAGE_NAME" $IMAGE_NAME
 
 # Source tag name from git
 if [ -z "$DOCKER_TAG_NAME" ]; then
   source_version_value
 fi
 
-# Source socat version from alpinelinux package manager
-if [ -z "$SOCAT_VERSION" ]; then
-  source_socat_version_value
-fi
-
 echo " * Using tag name: $DOCKER_TAG_NAME"
 echo
 
-# Perform build or release
-if [ "$TASK" == "release" ]; then
-  release
-else
-  build
-fi
+# Perform task, default to "make build"
+case $TASK in
+  "test" | "testruntime" | "release" )
+    run_$TASK;;
+
+  *)
+    run_build
+esac
 
 echo " * Done."
 echo

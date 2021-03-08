@@ -14,14 +14,14 @@ PHONY: build
 
 ## Runs a simple test against the built image
 test:
-	docker run --rm --entrypoint=socat $(IMAGE) -V | head -2
+	./scripts/make.sh test
 	@echo "All tests completed successfully"
 PHONY: test
 
 
-## Executes a simple socat test within a running docker instance
+## Executes simple socat-test.sh script within a running docker instance
 testruntime:
-	docker run --rm --entrypoint=/tmp/test-socat.sh $(IMAGE)
+	./scripts/make.sh testruntime
 	@echo "All tests completed successfully"
 PHONY: testruntime
 
