@@ -158,7 +158,9 @@ run_twistscan() {
 
   # Check for twistlock
   export PATH="$PATH:$HOME/bin"
-  TWISTCLI=$( which twistcli )
+  set +e
+  TWISTCLI=$( which twistcli 2>/dev/null )
+  set -e
 
   # Download if not present
   if [ -z "$TWISTCLI" ]; then
