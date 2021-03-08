@@ -12,6 +12,11 @@ build:
 PHONY: build
 
 
+## Run twistlock scan
+twistscan:
+	./scripts/make.sh twistscan
+PHONY: twistscan
+
 ## Runs a simple test against the built image
 test:
 	./scripts/make.sh test

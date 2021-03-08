@@ -148,6 +148,47 @@ run_build() {
 }
 
 
+# make twistscan
+run_twistscan() {
+  echo " * Running twistlock scan on docker image: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
+
+  # Check env vars
+  check_env_var "TWISTLOCK_USER" "$TWISTLOCK_USER"
+  check_env_var "TWISTLOCK_PASS" "$TWISTLOCK_PASS"
+
+  # Check for twistlock
+  export PATH="$PATH:$HOME/bin"
+  TWISTCLI=$( which twistcli )
+
+  # Download if not present
+  if [ -z "$TWISTCLI" ]; then
+    echo " * Downloading twistcli ..."
+
+    # Download from tools account
+    curl -k -L -s \
+      -u $TWISTLOCK_USER:$TWISTLOCK_PASS \
+      -o $HOME/bin/twistcli https://twistlock.tools.mspenv.io/api/v1/util/twistcli
+
+    # Ensure executable
+    chmod +x $HOME/bin/twistcli
+
+    # Check executable
+    echo " * Executing: twistcli -v ..."
+    twistcli -v
+  fi
+
+  # Run twistlock scan
+  twistcli images scan \
+    -u $TWISTLOCK_USER \
+    -p $TWISTLOCK_PASS \
+    --details \
+    --address https://twistlock.tools.mspenv.io/ \
+    $IMAGE_NAME:$DOCKER_TAG_NAME
+
+  echo
+}
+
+
 # make test
 run_test() {
   echo " * Testing static docker image: $IMAGE_NAME:$DOCKER_TAG_NAME ..."
@@ -218,7 +259,7 @@ echo
 
 # Perform task, default to "make build"
 case $TASK in
-  "test" | "testruntime" | "release" )
+  "twistscan" | "test" | "testruntime" | "release" )
     run_$TASK;;
 
   *)

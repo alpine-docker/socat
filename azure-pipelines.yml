@@ -1,5 +1,4 @@
-# This will fire for every PR on as well as tags.
-# Docker push and deployment to DEV will happen for commits to `master` branch or tags.
+# This pipeline will trigger on every PR change as well as for new tags
 pr:
   autoCancel: true
 
@@ -10,50 +9,74 @@ trigger:
 variables:
   - group: global-variables
 
-resources:
-  repositories:
-    - repository: templates
-      type: github
-      endpoint: mx51
-      name: mx51/azure-cicd-templates
-      ref: refs/heads/master
-
 stages:
-  - template: msp-be-pipeline.yml@templates
-    parameters:
-      componentName: alpine-socat
-      dockerRepository: mx51io
-      #accountClasses: [cde, main]
-      #deploymentRef: 'refs/heads/master'
-      preventDeployment: true
-      imageTag: $(Build.BuildNumber)
-      twistlockPassword: $(TWISTLOCK_PASSWORD)
-      dockerfilePath: Dockerfile
-      runHelmKubeval: false
-      runCheckDeps: false
-      runCheckPackr: []
-      runUnitTest: false
-      runCodeAnalysis: false
-      runCodeCoverage: false
-      runDBMigration: false
-      runE2ETests: false
-      runSnykVulnScan: false
-      category: ops
-      deployVersionURL: https://github.com/mx51/pi-alpine-socat/releases
+- stage: build
+  displayName: "Stage: Build"
 
-      # Additional build-stage testing steps
-      steps:
-      - script: make testruntime
-        displayName: "Socat tunnel runtime test"
+  jobs:
+  - job: Build
+    pool: shared
+    workspace:
+      clean: all
 
-  # Separate stage: test
-  - stage: test
-    displayName: "Stage: Test"
+    steps:
+
+    - script: make build
+      displayName: "Build image"
+
+  - job: Test
+    pool: shared
+    workspace:
+      clean: all
+
+    steps:
+
+    - script: make test
+      displayName: "Test image"
+
+  - job: Scan
+    pool: shared
+    workspace:
+      clean: all
+
+    steps:
+
+    - script: make twistscan
+      env:
+        TWISTLOCK_USER: $(TWISTLOCK_USER)
+        TWISTLOCK_PASS: $(TWISTLOCK_PASS)
+      displayName: "Scan image"
+
+
+- ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/') }}:
+  - stage: release
+    displayName: "Stage: Release"
+    dependsOn: build
+
     jobs:
-    - job: Test
+    - job: Release
       pool: shared
+      workspace:
+        clean: all
+
       steps:
 
-      # This does not work unless `make release` is performed on v*.*.* tag trigger
-      - script: echo make testruntime
-        displayName: "Socat tunnel runtime test"
+      - script: make release
+        displayName: "Release image"
+
+
+- ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/') }}:
+  - stage: runtime
+    displayName: "Stage: Runtime Test"
+    dependsOn: release
+
+    jobs:
+    - job: Runtime
+      pool: shared
+      workspace:
+        clean: all
+
+      steps:
+
+      - script: make testruntime
+        displayName: "Perform runtime test"
