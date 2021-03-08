@@ -183,6 +183,7 @@ run_twistscan() {
   twistcli images scan \
     -u $TWISTLOCK_USER \
     -p $TWISTLOCK_PASS \
+    --vulnerability-threshold medium \
     --details \
     --address https://twistlock.tools.mspenv.io/ \
     $IMAGE_NAME:$DOCKER_TAG_NAME
