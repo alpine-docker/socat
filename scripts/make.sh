@@ -156,37 +156,17 @@ run_twistscan() {
   check_env_var "TWISTLOCK_USER" "$TWISTLOCK_USER"
   check_env_var "TWISTLOCK_PASS" "$TWISTLOCK_PASS"
 
-  # Check for twistlock
-  export PATH="$PATH:$HOME/bin"
-  set +e
-  TWISTCLI=$( which twistcli 2>/dev/null )
-  set -e
-
-  # Download if not present
-  if [ -z "$TWISTCLI" ]; then
-    echo " * Downloading twistcli ..."
-
-    # Download from tools account
-    curl -k -L -s \
-      -u $TWISTLOCK_USER:$TWISTLOCK_PASS \
-      -o $HOME/bin/twistcli https://twistlock.tools.mspenv.io/api/v1/util/twistcli
-
-    # Ensure executable
-    chmod +x $HOME/bin/twistcli
-
-    # Check executable
-    echo " * Executing: twistcli -v ..."
-    twistcli -v
+  # Find relative path to twistscan.py
+  if [ -f "./twistscan.py" ]; then
+    TWISTSCAN_PY="./twistscan.py"
+  elif [ -f "./scripts/twistscan.py" ]; then
+    TWISTSCAN_PY="./scripts/twistscan.py"
+  else
+    die "error: could not locate python script: twistscan.py"
   fi
 
-  # Run twistlock scan
-  twistcli images scan \
-    -u $TWISTLOCK_USER \
-    -p $TWISTLOCK_PASS \
-    --vulnerability-threshold medium \
-    --details \
-    --address https://twistlock.tools.mspenv.io/ \
-    $IMAGE_NAME:$DOCKER_TAG_NAME
+  # Execute scan (note: use flag '-c' to fail on critical only)
+  $TWISTSCAN_PY -i "$IMAGE_NAME:$DOCKER_TAG_NAME"
 
   echo
 }
