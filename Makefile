@@ -12,11 +12,23 @@ build:
 PHONY: build
 
 
+## Run twistlock scan
+twistscan:
+	./scripts/make.sh twistscan
+PHONY: twistscan
+
 ## Runs a simple test against the built image
 test:
-	docker run --rm --entrypoint=socat $(IMAGE) -V | head -2
+	./scripts/make.sh test
 	@echo "All tests completed successfully"
 PHONY: test
+
+
+## Executes simple socat-test.sh script within a running docker instance
+testruntime:
+	./scripts/make.sh testruntime
+	@echo "All tests completed successfully"
+PHONY: testruntime
 
 
 ## Tag and push new docker image to docker hub
