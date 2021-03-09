@@ -129,21 +129,6 @@ run_build() {
   # Tag image
   docker_tag $IMAGE_NAME $DOCKER_TAG_NAME
 
-  # Debug tags
-  docker_tag $IMAGE_NAME "latest-debug"
-  docker_tag $IMAGE_NAME "$DOCKER_TAG_NAME-debug"
-
-  # Special 'image_name-debug:latest' tag required for be-build.yml template
-  echo " * Extra tag!"
-  echo " * Tagging image: $IMAGE_NAME-debug:latest"
-  docker tag $IMAGE_NAME:latest $IMAGE_NAME-debug:latest
-
-  # Extra tags (Azure)
-  if [ ! -z "$BUILD_BUILDNUMBER" ]; then
-    docker_tag $IMAGE_NAME "$BUILD_BUILDNUMBER"
-    docker_tag $IMAGE_NAME "$BUILD_BUILDNUMBER-debug"
-  fi
-
   echo
 }
 
@@ -201,16 +186,6 @@ run_release() {
   # Push latest tags
   docker_push $IMAGE_NAME "latest"
   docker_push $IMAGE_NAME $DOCKER_TAG_NAME
-
-  # Push debug tags
-  docker_push $IMAGE_NAME "latest-debug"
-  docker_push $IMAGE_NAME "$DOCKER_TAG_NAME-debug"
-
-  # Extra tags (Azure)
-  if [ ! -z "$BUILD_BUILDNUMBER" ]; then
-    docker_push $IMAGE_NAME "$BUILD_BUILDNUMBER"
-    docker_push $IMAGE_NAME "$BUILD_BUILDNUMBER-debug"
-  fi
 
   echo
 }
