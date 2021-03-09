@@ -40,7 +40,7 @@ stages:
         env:
           DOCKER_HUB_USER: $(DOCKER_HUB_USER)
           DOCKER_HUB_PASS: $(DOCKER_HUB_PASS)
-        displayName: 'Perform docker login to mx51io'
+        displayName: 'DockerHub login'
 
       - script: make release
         displayName: "Release image"
