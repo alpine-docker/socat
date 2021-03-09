@@ -1,5 +1,4 @@
-#FROM alpine:3.13.2
-FROM alpine:3.13.0
+FROM alpine:3.13.2
 
 ARG SOCAT_VERSION=1.7.4.2
 
