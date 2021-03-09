@@ -3,12 +3,12 @@
 .DEFAULT_GOAL := help
 
 # COLORS
-GREEN  := $(shell tput -Txterm setaf 2)
-YELLOW := $(shell tput -Txterm setaf 3)
-WHITE  := $(shell tput -Txterm setaf 7)
-RED    := $(shell tput -Txterm setaf 1)
-CYAN   := $(shell tput -Txterm setaf 6)
-RESET  := $(shell tput -Txterm sgr0)
+GREEN  := $(shell printf "\e[1;32m" )
+YELLOW := $(shell printf "\e[1;33m" )
+WHITE  := $(shell printf "\e[1;37m" )
+RED    := $(shell printf "\e[1;31m" )
+CYAN   := $(shell printf "\e[1;34m" )
+RESET  := $(shell printf "\e[0m" )
 
 TARGET_MAX_CHAR_NUM := 20
 
