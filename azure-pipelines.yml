@@ -49,7 +49,7 @@ stages:
 - ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/') }}:
   - stage: runtime
     displayName: "Stage: Runtime Test"
-    dependsOn: release
+    dependsOn: build
 
     jobs:
     - job: Runtime
