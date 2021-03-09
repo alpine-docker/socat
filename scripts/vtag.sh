@@ -49,30 +49,27 @@ fi
 if [[ ! "$NEW_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$ ]]; then
   echo "error: invalid version format: $NEW_VERSION"
   echo
-  echo "New git tag should use the format: x.x.x(-word.rev)?"
+  echo "New git tag should use the format: v*.*.*(-word.*)?"
   echo
   echo "Examples:"
-  echo " - 0.1.2"
-  echo " - 0.1.2-rc.1"
-  echo " - 0.1.2-alpha.2"
+  echo " - v0.1.2"
+  echo " - v0.1.2-rc.1"
+  echo " - v0.1.2-alpha.2"
   echo
   echo "Aborting."
   exit 1
 fi
 
-# Prepare new tag name
-NEW_TAG="v${NEW_VERSION}"
-
 # Check if tag exists
-if [[ $( git rev-parse -q --verify "refs/tags/$NEW_TAG" ) ]]; then
-  die "error: tag exists: $NEW_TAG"
+if [[ $( git rev-parse -q --verify "refs/tags/$NEW_VERSION" ) ]]; then
+  die "error: tag exists: $NEW_VERSION"
 fi
 
 # Create and push new tag
-echo " * Creating new tag: $NEW_TAG ..."
+echo " * Creating new tag: $NEW_VERSION ..."
 echo
-git tag $NEW_TAG -m "[RELMGMT: Tagged $NEW_TAG]"
-git push origin $NEW_TAG
+git tag $NEW_VERSION -m "[RELMGMT: Tagged $NEW_VERSION]"
+git push origin $NEW_VERSION
 
 # Finished
 echo
