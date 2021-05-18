@@ -1,7 +1,5 @@
-FROM alpine:edge
+FROM alpine:3.13.5
 
-ARG VERSION=1.7.3.2
-
-RUN apk --no-cache add socat=${VERSION}
+RUN apk --no-cache add socat
 
 ENTRYPOINT ["socat"]
