@@ -12,7 +12,7 @@ https://github.com/alpine-docker/socat
 
 ### Daily build logs:
 
-https://travis-ci.org/alpine-docker/socat
+https://travis-ci.com/alpine-docker/socat
 
 ### Docker image tags:
 
