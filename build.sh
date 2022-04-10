@@ -21,7 +21,7 @@ curl -s https://pkgs.alpinelinux.org/package/edge/main/x86/socat | docker run -i
 latest=$(awk '/^Version/ {print $2}' report)
 
 sum=0
-echo "Lastest release is: ${latest}"
+echo "Latest release is: ${latest}"
 
 tags=`curl -s https://hub.docker.com/v2/repositories/${image}/tags/ |jq -r .results[].name`
 
@@ -33,13 +33,11 @@ do
 done
 
 if [[ ( $sum -ne 1 ) || ( $1 == "rebuild" ) ]];then
-  docker build --build-arg VERSION=${latest} --no-cache -t ${image}:${latest} .
-  docker tag ${image}:${latest} ${image}:latest
-
   if [[ "$TRAVIS_BRANCH" == "master" ]]; then
     docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    docker push ${image}:${latest}
-    docker push ${image}:latest
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    docker buildx create --use
+    docker buildx build --push --platform linux/amd64,linux/arm64 --build-arg VERSION=${latest} -t ${image}:${latest} -t ${image}:latest .
   fi
 
 fi
