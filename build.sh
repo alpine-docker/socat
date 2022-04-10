@@ -33,11 +33,17 @@ do
 done
 
 if [[ ( $sum -ne 1 ) || ( $1 == "rebuild" ) ]];then
+  docker build --build-arg VERSION=${latest} --no-cache -t ${image}:${latest} .
+
   if [[ "$TRAVIS_BRANCH" == "master" ]]; then
     docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     docker buildx create --use
-    docker buildx build --push --platform linux/amd64,linux/arm64 --build-arg VERSION=${latest} -t ${image}:${latest} -t ${image}:latest .
+    docker buildx build --push \
+      --platform linux/arm/v7,linux/arm64/v8,linux/arm/v6,linux/amd64,linux/ppc64le,linux/s390x \
+      --build-arg VERSION=${latest} \
+      -t ${image}:${latest} \
+      -t ${image}:latest .
   fi
 
 fi
