@@ -1,12 +1,15 @@
-# After Travis CI adjusts their plan, we don't have enough free credit to run the build. So daily build has been adjusted to weekly. If you don't get latest version, please wait for one week.
-
 # socat
 
 Run socat command in alpine container
 
 [![DockerHub Badge](http://dockeri.co/image/alpine/socat)](https://hub.docker.com/r/alpine/socat/)
 
-Auto-trigger docker build for [socat](https://pkgs.alpinelinux.org/package/edge/main/x86/socat) when new version is released.
+Weekly auto-trigger docker build for [socat](https://pkgs.alpinelinux.org/package/edge/main/x86/socat) when new version is released.
+
+### New features: support multi-arch now.
+
+<img width="1188" alt="image" src="https://user-images.githubusercontent.com/8954908/162615860-c8ddce4d-d6bf-423c-adb3-e23a358b77d9.png">
+
 
 ### Repo:
 
