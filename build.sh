@@ -32,7 +32,7 @@ do
   fi
 done
 
-if [[ ( $sum -ne 1 ) || ( $1 == "rebuild" ) ]];then
+if [[ ( $sum -ne 1 ) || ( $1 == "true" ) ]];then
   docker build --build-arg VERSION=${latest} --no-cache -t ${image}:${latest} .
 
   if [[ "$TRAVIS_BRANCH" == "master" ]]; then
