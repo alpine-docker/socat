@@ -3,7 +3,7 @@ language: bash
 dist: bionic
 
 env:
-  - CI_NAME=travis DOCKER_CLI_EXPERIMENTAL=enabled rebuild="failed" imageName="socat"
+  - CI_NAME=travis DOCKER_CLI_EXPERIMENTAL=enabled imageName="socat"
 
 before_install:
   - sudo rm -rf /var/lib/apt/lists/*
