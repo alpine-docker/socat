@@ -5,7 +5,7 @@
 # DOCKER_USERNAME
 # DOCKER_PASSWORD
 
-set -ex
+set -e
 
 Usage() {
   echo "$0 [rebuild]"
