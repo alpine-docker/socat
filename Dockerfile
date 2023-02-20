@@ -1,8 +1,6 @@
 FROM alpine:latest
 
-ARG VERSION=1.7.4.3-r0
-
 RUN apk -U --no-cache upgrade \
-    && apk --no-cache add socat=${VERSION}
+    && apk --no-cache add socat
 
 ENTRYPOINT ["socat"]

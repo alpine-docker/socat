@@ -17,7 +17,7 @@ https://github.com/alpine-docker/socat
 
 ### Daily build logs:
 
-https://app.travis-ci.com/github/alpine-docker/socat
+https://app.circleci.com/pipelines/github/alpine-docker/socat
 
 ### Docker image tags:
 
@@ -94,8 +94,8 @@ In the following example, socat will be used to relay a host Cockpit instance to
 
 # The Processes to build this image
 
-* Enable Travis CI cronjob on this repo to run build daily on master branch
-* Check if there are new tags/releases announced via Alpine package url (https://hub.docker.com/r/alpine/socat/)
+* Enable CI cronjob on this repo to run build daily on master branch
+* Build the image locally, and get its latest version
 * Match the exist docker image tags via Hub.docker.io REST API
 * If not matched, build the image with latest version as tag and push to hub.docker.com
-* Docker tags as socat's version, such as 1.7.3.3-rc0, are built by travis ci auto-trigger cron jobs.
+* Docker tags as socat's version, such as 1.7.3.3-rc0, are built by ci auto-trigger cron jobs.
