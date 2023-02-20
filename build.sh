@@ -11,39 +11,50 @@ Usage() {
   echo "$0 [rebuild]"
 }
 
+install_jq() {
+  # jq 1.6
+  DEBIAN_FRONTEND=noninteractive
+  #sudo apt-get update && sudo apt-get -q -y install jq
+  curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o jq
+  sudo mv jq /usr/bin/jq
+  sudo chmod +x /usr/bin/jq
+}
+
+build() {
+
+  # install crane
+  curl -LO https://github.com/google/go-containerregistry/releases/download/v0.11.0/go-containerregistry_Linux_x86_64.tar.gz
+  tar zxvf go-containerregistry_Linux_x86_64.tar.gz
+  chmod +x crane
+  
+  if [[ ( "${CIRCLE_BRANCH}" == "master" ) ||( ${REBUILD} == "true" ) ]]; then
+
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      docker buildx create --use
+      docker buildx build --push \
+        --platform linux/arm/v7,linux/arm64/v8,linux/arm/v6,linux/amd64,linux/ppc64le,linux/s390x \
+        --build-arg VERSION=${latest} \
+        -t ${image}:${latest} \
+        -t ${image}:latest .
+  
+      ./crane copy ${image}:${tag} ${image}:latest
+  
+  
+  fi
+}
+
 image="alpine/socat"
 
-#curl -s https://pkgs.alpinelinux.org/package/edge/main/x86/socat |tee output
-#docker run -i --rm -v output:/apps/output alpine/html2text -nobs < output > report
+docker build -t socat . 
 
-curl -s https://pkgs.alpinelinux.org/package/edge/main/x86/socat | docker run -i --rm -v output:/apps/output alpine/html2text -nobs  > report
+latest=`docker run -t --rm socat -V|awk '$1=$1' |awk '/socat version/{print $3}'`
 
-latest=$(awk '/^Version/ {print $2}' report)
-
-sum=0
 echo "Latest release is: ${latest}"
 
-tags=`curl -s https://hub.docker.com/v2/repositories/${image}/tags/ |jq -r .results[].name`
+status=$(curl -sL https://hub.docker.com/v2/repositories/${image}/tags/${tag})
+echo $status
 
-for tag in ${tags}
-do
-  if [ ${tag} == ${latest} ];then
-    sum=$((sum+1))
-  fi
-done
-
-if [[ ( $sum -ne 1 ) || ( $1 == "true" ) ]];then
-  docker build --build-arg VERSION=${latest} --no-cache -t ${image}:${latest} .
-
-  if [[ "$TRAVIS_BRANCH" == "master" ]]; then
-    docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    # docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    docker buildx create --use
-    docker buildx build --push \
-      --platform linux/arm/v7,linux/arm64/v8,linux/arm/v6,linux/amd64,linux/ppc64le,linux/s390x \
-      --build-arg VERSION=${latest} \
-      -t ${image}:${latest} \
-      -t ${image}:latest .
-  fi
-
+if [[ ( "${status}" =~ "not found" ) ||( ${REBUILD} == "true" ) ]]; then
+   echo "build image for ${tag}"
+   build
 fi
