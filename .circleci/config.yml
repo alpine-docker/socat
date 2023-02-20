@@ -35,10 +35,10 @@ workflows:
           name: build
           context:
             - Docker-Hub
-          #filters:
-          #  branches:
-          #    only:
-          #      - master
+          filters:
+            branches:
+              only:
+                - master
           #      - main
 
   nightly:
