@@ -19,6 +19,7 @@ jobs:
       - image: alpine/docker-with-buildx
     environment:
       REBUILD: << pipeline.parameters.rebuild >>
+      IMAGE: alpine/socat:latest
     steps:
       - checkout
       - setup_remote_docker:
@@ -27,6 +28,7 @@ jobs:
           apk --no-cache --update add bash curl sudo
           echo $REBUILD
           bash ./build.sh
+          docker run -ti --rm -v /var/run/docker.sock:/var/run/docker.sock -v ~/.cache:/root/.cache aquasec/trivy image --severity HIGH,CRITICAL ${IMAGE}
 
 workflows:
   build:
