@@ -1,3 +1,7 @@
+# Notes
+
+This repo has been archived, follow up project at https://github.com/alpine-docker/multi-arch-libs/tree/master/socat
+
 # socat
 
 [If enjoy, please consider buying me a coffee.](https://www.buymeacoffee.com/ozbillwang)
